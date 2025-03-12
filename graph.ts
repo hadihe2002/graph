@@ -1,6 +1,10 @@
-import { graphql, GraphQLSchema, GraphQLID } from "graphql";
-import { GraphQLObjectType } from "graphql";
-import { GraphQLList } from "graphql";
+import {
+  graphql,
+  GraphQLSchema,
+  GraphQLID,
+  GraphQLObjectType,
+  GraphQLList,
+} from "graphql";
 import { BookType } from "./book";
 import { authors, books } from "./data";
 import { AuthorType } from "./author";
@@ -50,6 +54,7 @@ const server = createServer(async (req, res) => {
 
     req.on("end", async () => {
       const { query, variables } = JSON.parse(body);
+
       const response = await graphql({
         schema,
         source: query,
