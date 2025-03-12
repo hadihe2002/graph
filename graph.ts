@@ -1,11 +1,10 @@
 import { graphql, GraphQLSchema, GraphQLID } from "graphql";
-import express from "express";
 import { GraphQLObjectType } from "graphql";
 import { GraphQLList } from "graphql";
 import { BookType } from "./book";
 import { authors, books } from "./data";
 import { AuthorType } from "./author";
-import { json } from "body-parser";
+import { createServer } from "node:http";
 
 const QueryType = new GraphQLObjectType({
   name: "Query",
@@ -41,22 +40,28 @@ const QueryType = new GraphQLObjectType({
 
 const schema = new GraphQLSchema({ query: QueryType });
 
-const app = express();
-app.use(json());
+const server = createServer(async (req, res) => {
+  if (req.method === "POST" && req.url === "/graphql") {
+    let body = "";
 
-app.post("/graphql", async (req, res) => {
-  try {
-    const response = await graphql({
-      schema,
-      source: req.body.query,
-      variableValues: req.body.variables,
+    req.on("data", (chunk) => {
+      body += chunk;
     });
-    res.json(response.data);
-  } catch (err) {
-    throw err;
+
+    req.on("end", async () => {
+      const { query, variables } = JSON.parse(body);
+      const response = await graphql({
+        schema,
+        source: query,
+        variableValues: variables,
+      });
+
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(response));
+    });
   }
 });
 
-app.listen(4000, () =>
-  console.log("🚀 server running at http://localhost:4000/graphql")
+server.listen(4000, () =>
+  console.log("🚀 Server running at http://localhost:4000/graphql")
 );
