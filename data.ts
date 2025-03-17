@@ -15,4 +15,6 @@ export const books: IBook[] = [
   },
   { id: "201", title: "The Hobbit", authorId: "2" },
   { id: "202", title: "The Lord of the Rings", authorId: "2" },
+  { id: "301", title: "The Hobbit", authorId: "2" },
+  { id: "302", title: "The Lord of the Rings", authorId: "2" },
 ];

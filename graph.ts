@@ -4,6 +4,7 @@ import {
   GraphQLID,
   GraphQLObjectType,
   GraphQLList,
+  GraphQLInt,
 } from "graphql";
 import { BookType } from "./book";
 import { authors, books } from "./data";
@@ -15,7 +16,15 @@ const QueryType = new GraphQLObjectType({
   fields: () => ({
     books: {
       type: new GraphQLList(BookType),
-      resolve: () => books,
+      args: {
+        page: { type: GraphQLInt, defaultValue: 1 },
+        limit: { type: GraphQLInt, defaultValue: 1 },
+      },
+      resolve: (_, { page = 1, limit = 10 }) => {
+        const start = (page - 1) * limit;
+        const end = start + limit;
+        return books.slice(start, books.length < end ? books.length : end);
+      },
     },
     book: {
       type: BookType,
@@ -62,7 +71,8 @@ const server = createServer(async (req, res) => {
       });
 
       res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify(response));
+      res.write(JSON.stringify(response));
+      res.end();
     });
   }
 });
